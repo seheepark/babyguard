@@ -45,7 +45,7 @@ while 1: # Check Baby Crying or not
         signal = roll(signal, - chunk)
         signal[- chunk :] = num_data
         fftspec = fft(signal)
-	babySound = abs(fftspec[0]*signal_scale)
+	babySound = abs(fftspec[130]*signal_scale) # This is may be baby's crying Hz (1000Hz)
 	# First, check baby's minimum sound
 	if babySound > 10:
 		totalStartTimer = time.time() # Timer start
@@ -69,7 +69,7 @@ while 1: # Check Baby Crying or not
 					signal = roll(signal, - chunk)
 					signal[- chunk :] = num_data
 					fftspec = fft(signal)
-					babySound = abs(fftspec[200]*signal_scale)
+					babySound = abs(fftspec[130]*signal_scale) # This is may be baby's crying Hz (1000Hz)
 					# Belows check if this sound is curved sound
 					if babySound >= 30: 
 						max = 1
