@@ -16,9 +16,9 @@ child = exec ('mkdir /tmp/stream', function (error, stdout, stderr) { // For vid
 });
 child = exec ('raspistill --nopreview -w 640 -h 480 -q 5 -o /tmp/stream/pic3.jpg -tl 100 -t 55555 -th 0:0:0 &', function (error, stdout, stderr) {
 }); // For video streaming
-child = exec ('sudo ./detecting.py 22 4', function (error, stdout, stderr) { // For detecting temp-hum
+child = exec ('python ./detecting.py 22 4', function (error, stdout, stderr) { // For detecting temp-hum
 });
-child = exec ('sudo ./babyCrying.py', function (error, stdout, stderr) { // For detecting baby crying
+child = exec ('python ./babyCrying.py', function (error, stdout, stderr) { // For detecting baby crying
 });
 child = exec ('LD_LIBRARY_PATH=/usr/local/lib mjpg_streamer -i "input_file.so -f /tmp/stream -n pic.jpg" -o "output_http.so -w /usr/local/www"', function (error, stdout, stderr) {
 }); // For video streaming
