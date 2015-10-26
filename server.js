@@ -7,23 +7,21 @@ var child;
 var temhum;
 
 var message = new gcm.Message ();
-//var server_access_key = 'AIzaSyCAkwJgDPnLbwZwKz7grVxhs7iXtkx6wmo';
-//var sender = new gcm.Sender(server_access_key);
 var regIds = [];
 
 var port = 8082;
 var ip = "192.168.0.54";
 
-child = exec ('mkdir /tmp/stream', function (error, stdout, stderr) {
+child = exec ('mkdir /tmp/stream', function (error, stdout, stderr) { // For video streaming
 });
 child = exec ('raspistill --nopreview -w 640 -h 480 -q 5 -o /tmp/stream/pic3.jpg -tl 100 -t 55555 -th 0:0:0 &', function (error, stdout, stderr) {
+}); // For video streaming
+child = exec ('python ./detecting.py 22 4', function (error, stdout, stderr) { // For detecting temp-hum
 });
-child = exec ('sudo ./detecting.py 22 4', function (error, stdout, stderr) {
-});
-child = exec ('sudo ./babyCrying.py', function (error, stdout, stderr) {
+child = exec ('python ./babyCrying.py', function (error, stdout, stderr) { // For detecting baby crying
 });
 child = exec ('LD_LIBRARY_PATH=/usr/local/lib mjpg_streamer -i "input_file.so -f /tmp/stream -n pic.jpg" -o "output_http.so -w /usr/local/www"', function (error, stdout, stderr) {
-});
+}); // For video streaming
 
 console.log ('Server is waiting for connection');
 
@@ -44,7 +42,7 @@ var server = require('net').createServer(function(socket) {
 
 			child = exec ('sudo ./AdafruitDHT.py 22 4', function (error, stdout, stderr) {
 				temhum = stdout;		
-				socket.write (temhum);
+				socket.write (temhum); // Send temp-hum and in-appropriate information to android
 				socket.end ();
 			});
 		}
@@ -53,14 +51,14 @@ var server = require('net').createServer(function(socket) {
 			console.log ('Voice signal is detected');
 
 			child = exec ('omxplayer /home/pi/voice.mp4', function (error, stdout, stderr) {
-			});
+			}); // Play parents voice
 		}
 		else if (signal == 3)
 		{
 			console.log ('Streaming signal is detected');
 
 			child = exec ('LD_LIBRARY_PATH=/usr/local/lib mjpg_streamer -i "input_file.so -f /tmp/stream -n pic.jpg" -o "output_http.so -w /usr/local/www"', function (error, stdout, stderr) {
-			});
+			}); // For if streaming is broken, reconnect
 		}
 		else if (signal == 4)
 		{
@@ -79,7 +77,7 @@ var server = require('net').createServer(function(socket) {
 			var server_access_key = 'AIzaSyCAkwJgDPnLbwZwKz7grVxhs7iXtkx6wmo';
 			var sender = new gcm.Sender (server_access_key);
 
-			for (i=0; i<regIds.length; i++)
+			for (i=0; i<regIds.length; i++) // Send GCM messages to all connected user's android
 			{
 				sender.send (message, regIds[i], 4, function (err, result) {
 					console.log (result);
@@ -103,7 +101,7 @@ var server = require('net').createServer(function(socket) {
 			var server_access_key = 'AIzaSyCAkwJgDPnLbwZwKz7grVxhs7iXtkx6wmo';
 			var sender = new gcm.Sender (server_access_key);
 
-			for (i=0; i<regIds.length; i++)
+			for (i=0; i<regIds.length; i++) // Send GCM messages to all connected user's android
 			{
 				sender.send (message, regIds[i], 4, function (err, result) {
 					console.log (result);
@@ -127,7 +125,7 @@ var server = require('net').createServer(function(socket) {
 			var server_access_key = 'AIzaSyCAkwJgDPnLbwZwKz7grVxhs7iXtkx6wmo';
 			var sender = new gcm.Sender (server_access_key);
 				
-			for (i=0; i<regIds.length; i++)
+			for (i=0; i<regIds.length; i++) // Send GCM messages to all connected user's android
 			{
 				sender.send (message, regIds[i], 4, function (err, result) {
 					console.log (result);
@@ -154,7 +152,7 @@ var server = require('net').createServer(function(socket) {
 				var server_access_key = 'AIzaSyCAkwJgDPnLbwZwKz7grVxhs7iXtkx6wmo';
 				var sender = new gcm.Sender (server_access_key);
 
-				for (i=0; i<regIds.length; i++)
+				for (i=0; i<regIds.length; i++) // Send GCM messages to all connected user's android
 				{
 					sender.send (message, regIds[i], 4, function (err, result) {
 						console.log (result);
@@ -162,17 +160,17 @@ var server = require('net').createServer(function(socket) {
 				}
 		
 				child = exec ('omxplayer /home/pi/voice.mp4', function(err, stdout, stderr) {
-				});
+				}); // Play parents voice
 			}
 		}
 		else if (signal == 8)
-		{
+		{ // Start baby monitoring
 			console.log ('Baby is now sleeping');
-			startTime = time.time();	
+			startTime = time.time(); // For show baby's total sleeping time to parents
 			sleeping = 1;
 		}
 		else if (signal == 9)
-		{
+		{ // End baby monitoring
 			console.log ('Baby is now wake up')
 			var endTime = time.time();
 			var totalTime = endTime - startTime;
@@ -191,60 +189,24 @@ var server = require('net').createServer(function(socket) {
 				{
 					var hours = floor(minutesTmp/60);
 					var minutes = minutesTmp%60;
-					//var i;
+
 					console.log ('%d 시간 %d 분 %d 초', hours, minutes, seconds);
-					/*var message = new gcm.Message ({
-						collapseKey: 'demo',
-						delayWhileIdle: true,
-						timeToLive: 3,
-						data : {
-							key1: '아기 취침 정보 -  아기의 총 수면 시간 : %d 시간 %d 분 %d 초, 중간에 깬 횟수 : %d 번' % (hours, minutes, seconds, wakeUp)
-						}
-					});
-					
-					var server_access_key = 'AIzaSyCAkwJgDPnLbwZwKz7grVxhs7iXtkx6wmo';
-					var sender = new gcm.Sender (server_access_key);
-					
-					for (i=0; i<regIds.length; i++)
-					{
-						sender.send (message, regIds[i], 4, function (err, result) {
-							console.log (result);
-						});
-					}*/
+				
 					socket.write (hours)
 					socket.end(hours + "." + minutes + "." + seconds + "." + wakeUp);
 					wakeUp = 0;
 				}
 				else
 				{
-					//var i;
 					console.log ('%d 분 %d 초', minutesTmp, seconds);
-					/*
-					var message = new gcm.Message ({
-						collapseKey: 'demo',
-						delayWhileIdle: true,
-						timeToLive: 3,
-						data : {
-							key1: '아기 취침 정보 - 아기의 총 수면 시간 : %d 분 %d 초, 중간에 깬 횟수 : %d 번' % (minutesTmp, seconds, wakeUp)
-						}
-					});
 					
-					var server_access_key = 'AIzaSyCAkwJgDPnLbwZwKz7grVxhs7iXtkx6wmo';
-					var sender = new gcm.Sender (server_access_key);
-				
-					for (i=0; i<regIds.length; i++)
-					{
-						sender.send (message, regIds[i], 4, function (err, result) {
-							console.log (result);
-						});
-					}*/
 					socket.write (1 + "." + 0 + "." + minutesTmp + "." + seconds + "." + wakeUp);
 					socket.end();
 					wakeUp = 0;
 				}
 			}
 		}
-		else 
+		else // Enroll parents GCM registration id
 		{
 			console.log (signal);
 			var i;

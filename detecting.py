@@ -63,87 +63,50 @@ while True:
 # guarantee the timing of calls to read the sensor).
 # If this happens try again!
 	if humidity is not None and temperature is not None:
-		#print 'Temperature : {0:0.1f}*C\nHumidity : {1:0.1f}%\n'.format(temperature, humidity)
-		#time.sleep(1)
 		print temperature
 		print humidity
 
-		totalTimer = (endTimer - startTimer) / 4
+		totalTimer = (endTimer - startTimer) / 600 # Check temp-hum data every 10minutes.
 
-		if 30 <= temperature and temperature <= 31:
+		if 24 <= temperature and temperature <= 26:
 			print 'Temperature is appropriate'
 
-			#endTimer = 0
-			#startTimer = 0
-			#startTimer = time.time()
-
 			tempIn = 0
-			#count1 = 0
-			#count3 = 0
 		else: 
 			print 'Temperature is inappropriate'
 			
-			#startTimer = time.time()	
 			endTimer = time.time()	
 
 			tempIn = 1
-			#count1+=1
-			#count3+=0.5
-		if 80 <= humidity and humidity <= 81:
+		if 40 <= humidity and humidity <= 60:
 			print 'Humidity is appropriate'
-
-			#endTimer = 0
-			#startTimer = 0	
-			#startTimer = time.time()
 			
 			humIn = 0
-			#count2 = 0
-			#count3 = 0
 		else:
 			print 'Humidity is inappropriate'
 
-			#startTimer = time.time()
 			endTimer = time.time()
 
 			humIn = 1
-			#count2+=1
-			#count3+=0.5
 		
-		if tempIn == 1 and humIn == 0:
-			#if totalTimer < 1:
-			#	endTimer = time.time()
+		if tempIn == 1 and humIn == 0: # This is temp-inappropriate
 			if totalTimer >= 1:
-			#if count1 == 1 or count1 % 1000 == 0:
 				tcpClientSocket.send ('4')
 				endTimer = 0
 				startTimer = 0
 				startTimer = time.time()
 		elif humIn == 1 and tempIn == 0:
-			#if totalTimer < 1:
-			#	endTimer = time.time()
-			if totalTimer >= 1:
-			#if count2 == 1 or count2 % 1000 == 0:
+			if totalTimer >= 1: # This is hum-inappropriate
 				tcpClientSocket.send ('5')
 				endTimer = 0
 				startTimer = 0
 				startTimer = time.time()
-		elif humIn == 1 and tempIn == 1:
+		elif humIn == 1 and tempIn == 1: # This is Temp-Hum inappropriate
 			print totalTimer
-			#if totalTimer < 1:
-			#	endTimer = time.time()
 			if totalTimer >= 1:
-			#if count3 == 1 or count3 % 1000 == 0:
 				tcpClientSocket.send ('6')
 				endTimer = 0
 				startTimer = 0
 				startTimer = time.time()
-#	tempData = format(temperature)
-#	humData = format(humidity)
-#	print tempData
-#	print humData
-	#humData = humidity
-#	tcpClientSocket.send(tempData)
-#	tcpClientSocket.send(humData)
-	#tcpClientSocket.send(humData)
 	else:
 		print 'Failed to get reading. Try again!'

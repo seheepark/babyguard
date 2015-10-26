@@ -11,7 +11,7 @@ addr = (host,port)
 
 tcpClientSocket = socket(AF_INET, SOCK_STREAM)
 tcpClientSocket.connect(addr)
-
+# Setting Sound conditions
 fftLen = 2048
 shift = 100
 signal_scale = 1. / 2000
@@ -21,7 +21,7 @@ capture_setting = {
     "fs" : 16000,
     "chunk" : shift
     }
-
+# Capture sounds using PCM
 ch = capture_setting["ch"]
 fs = capture_setting["fs"]
 chunk = capture_setting["chunk"]
@@ -39,29 +39,29 @@ down = 0
 max = 0
 count = 0
 
-while 1:
+while 1: # Check Baby Crying or not
 	length, data = inPCM.read()
         num_data = fromstring(data, dtype = "int16")
         signal = roll(signal, - chunk)
         signal[- chunk :] = num_data
         fftspec = fft(signal)
-	babySound = abs(fftspec[0]*signal_scale)
-
+	babySound = abs(fftspec[130]*signal_scale) # This is may be baby's crying Hz (1000Hz)
+	# First, check baby's minimum sound
 	if babySound > 10:
-		totalStartTimer = time.time()
+		totalStartTimer = time.time() # Timer start
 		totalEndTimer = 0
 		
-		while totalEndTimer - totalStartTimer < 50:
+		while totalEndTimer - totalStartTimer < 50: # Check during 50 seconds
 			totalEndTimer = time.time()
 			
-			if babySound >= tmpSound:
-				up = 1
+			if babySound >= tmpSound: # If recent sound is higher than previous sound, doubt baby's sound
+				up = 1		  
 				print "up"
-				startTimer = time.time()
+				startTimer = time.time() # Start timer for filtering other sound
 				endTimer = 0
 				tmpSound = babySound
 
-				while endTimer-startTimer < 5:
+				while endTimer-startTimer < 5: # Check during 5 seconds
 					endTimer = time.time()
 				
 					length, data = inPCM.read()
@@ -69,8 +69,9 @@ while 1:
 					signal = roll(signal, - chunk)
 					signal[- chunk :] = num_data
 					fftspec = fft(signal)
-					babySound = abs(fftspec[200]*signal_scale)
-					if babySound >= 30:
+					babySound = abs(fftspec[130]*signal_scale) # This is may be baby's crying Hz (1000Hz)
+					# Belows check if this sound is curved sound
+					if babySound >= 30: 
 						max = 1
 						print "max"
 					elif max == 1 and babySound < tmpSound and babySound < 10:
@@ -80,8 +81,8 @@ while 1:
 					if up == 1 and max == 1 and down == 1:
 						break
 	
-				if up == 1 and max == 1 and down == 1:
-					count+=1
+				if up == 1 and max == 1 and down == 1: # If this sound is curved sound, doubt baby's crying
+					count+=1 # Check 5 times
 					print count
 
 				up = 0
@@ -91,7 +92,7 @@ while 1:
 				startTimer = 0
 				endTimer = 0
 			print count
-			if count >= 5:
+			if count >= 5: # If curved sounds appear 5 times higher in 1000Hz. It may be baby's crying
 				print "babyCying"
 				tcpClientSocket.send ('7')
 				tmpSound = 0
@@ -100,8 +101,5 @@ while 1:
 		count = 0
 		totalStartTimer = 0
 		totanEndTimer = 0
-								
-		#if  
-        #specItem.plot(abs(fftspec[1 : fftLen / 2 + 1] * signal_scale), clear = True
 	
 
