@@ -21,15 +21,7 @@
 # SOFTWARE.
 
 import sys
-#from socket import *
 import Adafruit_DHT
-
-#host = '192.168.0.28'
-#port = 8081
-#addr = (host,port)
-
-#tcpClientSocket = socket(AF_INET, SOCK_STREAM)
-#tcpClientSocket.connect(addr)
 
 # Parse command line parameters.
 sensor_args = { '11': Adafruit_DHT.DHT11,
@@ -58,19 +50,9 @@ if humidity is not None and temperature is not None:
 		print 'Temperature is appropriate'
 	else: 
 		print 'Temperature is inappropriate !!'
-#		tcpClientSocket.send (1);	
 	if 40 <= humidity and humidity <= 60:
 		print 'Humidity is appropriate'
 	else:
 		print 'Humidity is inappropriate !!'
-#		tcpClientSocket.send (2);
-#	tempData = format(temperature)
-#	humData = format(humidity)
-#	print tempData
-#	print humData
-	#humData = humidity
-#	tcpClientSocket.send(tempData)
-#	tcpClientSocket.send(humData)
-	#tcpClientSocket.send(humData)
 else:
 	print 'Failed to get reading. Try again!'
