@@ -49,9 +49,6 @@ else:
 
 tempIn = 0
 humIn = 0
-count1 = 0
-count2 = 0
-count3 = 0
 startTimer = time.time()
 endTimer = 0
 
@@ -68,7 +65,7 @@ while True:
 
 		totalTimer = (endTimer - startTimer) / 600 # Check temp-hum data every 10minutes.
 
-		if 24 <= temperature and temperature <= 26:
+		if 22 <= temperature and temperature <= 24:
 			print 'Temperature is appropriate'
 
 			tempIn = 0

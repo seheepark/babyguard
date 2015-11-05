@@ -40,7 +40,7 @@ var server = require('net').createServer(function(socket) {
 		{
 			console.log ('Temp-Hum signal is detected');
 
-			child = exec ('sudo ./AdafruitDHT.py 22 4', function (error, stdout, stderr) {
+			child = exec ('python ./tempHum.py 22 4', function (error, stdout, stderr) {
 				temhum = stdout;		
 				socket.write (temhum); // Send temp-hum and in-appropriate information to android
 				socket.end ();
