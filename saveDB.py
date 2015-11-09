@@ -40,7 +40,7 @@ while 1:
 		str = "alter table infosleep auto_increment=1"
 		cursor.execute(str)
 		db.commit()
-	# Insert baby's sleeping data
+	# Inserts baby's sleeping data
 	str = "insert into infosleep(date, hour, min, sec, wakeUpCnt) values(%s, %d, %d, %d, %d)" % (date, hour, min, sec, wakeUpCnt)
 	cursor.execute(str)
 	db.commit()
