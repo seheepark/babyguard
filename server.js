@@ -250,7 +250,7 @@ var server = require('net').createServer(function(socket) {
 				}
 			}
 		}
-		// Below is controlling GCM alarm
+		// Belows are controlling GCM alarm
 		else if (signal == 10)
 		{
 			console.log ("Temp-Hum GCM off signal is detected");
