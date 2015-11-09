@@ -6,14 +6,6 @@ import os
 server_socket = socket (AF_INET, SOCK_STREAM)
 server_socket.bind (("", 5000))
 server_socket.listen(5)
-# For use DB
-db = MySQLdb.connect('localhost', 'root', 'asdf', 'babysleep')
-print("db connect")
-cursor=db.cursor()
-cursor.execute("show databases")
-print("show db")
-cursor.execute("use babysleep")
-print("use babysleep")
 
 while 1:
 	client_socket, address = server_socket.accept()
@@ -23,8 +15,13 @@ while 1:
 	tmp = '0'	
 	if data == '1':
 		print ("Now, Sending data to Android")
+		# For use DB
+		db = MySQLdb.connect('localhost', 'root', 'asdf', 'babysleep')
+		cursor=db.cursor()
+		cursor.execute("use babysleep")
 		cursor.execute ("select * from infosleep") # Extract all data from DB
 		row = cursor.fetchall()
+		
 		for c in row:
 			date = c[0]
 			hour = c[2]
