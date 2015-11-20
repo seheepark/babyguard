@@ -15,6 +15,7 @@ while 1:
 	tmp = '0'	
 	if data == '1':
 		print ("Now, Sending data to Android")
+<<<<<<< HEAD
 		db = MySQLdb.connect ('localhost', 'root', 'asdf', 'babysleep')
 		cursor = db.cursor()
 		cursor.execute ("use babysleep")
@@ -32,6 +33,15 @@ while 1:
 			tmp = '0'
 			print "Total is 1"
 
+=======
+		# For use DB
+		db = MySQLdb.connect('localhost', 'root', 'asdf', 'babysleep')
+		cursor=db.cursor()
+		cursor.execute("use babysleep")
+		cursor.execute ("select * from infosleep") # Extract all data from DB
+		row = cursor.fetchall()
+		
+>>>>>>> c54d3032ebc24d8832aecbcae38c26d3e33a4e30
 		for c in row:
 			date = c[0]
 			hour = c[2]

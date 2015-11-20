@@ -8,25 +8,23 @@ var child;
 var temhum;
 
 var message = new gcm.Message ();
-//var server_access_key = 'AIzaSyCAkwJgDPnLbwZwKz7grVxhs7iXtkx6wmo';
-//var sender = new gcm.Sender(server_access_key);
 var regIds = [];
 
 var port = 8082;
 var ip = "192.168.0.54";
 
-child = exec ('mkdir /tmp/stream', function (error, stdout, stderr) {
+child = exec ('mkdir /tmp/stream', function (error, stdout, stderr) { // For video streaming
 });
 child = exec ('raspistill --nopreview -w 640 -h 480 -q 5 -o /tmp/stream/pic3.jpg -tl 100 -t 55555 -th 0:0:0 &', function (error, stdout, stderr) {
-});
-child = exec ('python ./detecting.py 22 4', function (error, stdout, stderr) {
+}); // For video streaming
+child = exec ('python ./detecting.py 22 4', function (error, stdout, stderr) { // For detecting temp-hum
 });
 child = exec ('LD_LIBRARY_PATH=/usr/local/lib mjpg_streamer -i "input_file.so -f /tmp/stream -n pic.jpg" -o "output_http.so -w /usr/local/www"', function (error, stdout, stderr) {
-});
-child = exec ('python parkTest.py', function (error, stdout, stderr) {
-});
-//child = exec ('python sendLog.py', function (error, stdout, stderr) {
-//});
+}); // For video streaming
+child = exec ('python saveDB.py', function (error, stdout, stderr) {
+}); // For save sleeping's data to DB
+child = exec ('python sendLog.py', function (error, stdout, stderr) {
+}); // For send sleeping's data to Android
 
 console.log ('Server is waiting for connection');
 
@@ -51,7 +49,7 @@ var server = require('net').createServer(function(socket) {
 
 			child = exec ('sudo ./AdafruitDHT.py 22 4', function (error, stdout, stderr) {
 				temhum = stdout;		
-				socket.write (temhum);
+				socket.write (temhum); // Send temp-hum and in-appropriate information to android
 				socket.end ();
 			});
 		}
@@ -60,17 +58,18 @@ var server = require('net').createServer(function(socket) {
 			console.log ('Voice signal is detected');
 
 			child = exec ('omxplayer /home/pi/voice.mp4', function (error, stdout, stderr) {
-			});
+			}); // Play parents voice
 		}
 		else if (signal == 3)
 		{
 			console.log ('Streaming signal is detected');
 
 			child = exec ('LD_LIBRARY_PATH=/usr/local/lib mjpg_streamer -i "input_file.so -f /tmp/stream -n pic.jpg" -o "output_http.so -w /usr/local/www"', function (error, stdout, stderr) {
-			});
+			}); // For if streaming is broken, reconnect
 		}
 		else if (signal == 4 && tempHumGcmOff == 0)
 		{
+			// Send GCM messages to all connected user's android
 			var i;
 			console.log ('Temperature inappropriate signal is detected');
 		
@@ -95,6 +94,7 @@ var server = require('net').createServer(function(socket) {
 		}
 		else if (signal == 5 && tempHumGcmOff == 0)
 		{
+			// Send GCM messages to all connected user's android
 			var i;
 			console.log ('Humidity inappropriate signal is detected');
 
@@ -119,6 +119,7 @@ var server = require('net').createServer(function(socket) {
 		}
 		else if (signal == 6 && tempHumGcmOff == 0)
 		{
+			// Send GCM messages to all connected user's android
 			var i;
 			console.log ('Temp-Hum inappropriate signal is detected');
 
@@ -143,6 +144,7 @@ var server = require('net').createServer(function(socket) {
 		}
 		else if (signal == 7)
 		{	
+			// Send GCM messages to all connected user's android
 			console.log ('Baby crying signal is detected');
 			wakeUp+=1;
 			if (sleeping == 1 && babyGcmOff == 0)
@@ -169,20 +171,20 @@ var server = require('net').createServer(function(socket) {
 				}
 		
 				child = exec ('omxplayer /home/pi/voice.mp4', function(err, stdout, stderr) {
-				});
+				}); // Play parents voice
 			}
 		}
 		else if (signal == 8)
-		{
+		{ // Start baby monitoring
 			console.log ('Baby is now sleeping');
-			startTime = time.time();	
+			startTime = time.time(); // For show baby's total sleeping time to parents	
 			sleeping = 1;
 			wakeUp = 0;
 			child = exec ('python babyCrying.py', function (error, stdout, stderr) {
-			});
+			}); // For detecting baby crying
 		}
 		else if (signal == 9)
-		{
+		{ // End baby monitoring
 			console.log ('Baby is now wake up')
 			
 			var endTime = time.time();
@@ -191,7 +193,7 @@ var server = require('net').createServer(function(socket) {
 			startTime = 0;
 			sleeping = 0;
 			wakeUp-=1;
-
+			// Extract now date
 			var date = new Date();
 			var year = date.getFullYear(); 
 			var month = (date.getMonth() + 1);
@@ -215,7 +217,7 @@ var server = require('net').createServer(function(socket) {
 				{
 					var hours = floor(minutesTmp/60);
 					var minutes = minutesTmp%60;
-					//var i;
+
 					console.log ('%d 시간 %d 분 %d 초', hours, minutes, seconds);
 					
 					// Send data to Android				
@@ -248,6 +250,7 @@ var server = require('net').createServer(function(socket) {
 				}
 			}
 		}
+		// Belows are controlling GCM alarm
 		else if (signal == 10)
 		{
 			console.log ("Temp-Hum GCM off signal is detected");
@@ -268,7 +271,7 @@ var server = require('net').createServer(function(socket) {
 			console.log ("Baby wake up GCM on signal is detected");
 			babyGcmOff = 0;
 		}
-		else 
+		else // Enroll parents GCM registration id
 		{
 			console.log (signal);
 			var i;
@@ -290,14 +293,5 @@ var server = require('net').createServer(function(socket) {
 			}
 		}
 	});
-//	connection.end();
 });
 server.listen (port, ip);
-
-/*var http = require ('http');
-
-http.createServer (
-	function (req, res) {
-		res.writeHead (200, {'Content-Type': 'text/plain'});
-		res.write ()
-*/
